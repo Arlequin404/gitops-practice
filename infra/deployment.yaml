@@ -28,10 +28,12 @@ spec:
         - /bin/sh
         - -c
         args:
+        - /bin/sh
+        - -c  
         - |
           while true; do
             git clone https://github.com/Arlequin404/gitops-practice /tmp/html || (cd /tmp/html && git pull);
-            cp -r /tmp/html/index.html /usr/share/nginx/html/index.html;
+            cp -r /tmp/html/app/index.html /usr/share/nginx/html/index.html;
             sleep 30;
           done
         volumeMounts:
