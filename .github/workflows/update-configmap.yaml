@@ -22,10 +22,11 @@ jobs:
           echo "$CA_CRT_BASE64" | base64 -d > ~/.minikube/ca.crt
           echo "$CLIENT_CRT_BASE64" | base64 -d > ~/.minikube/profiles/minikube/client.crt
           echo "$CLIENT_KEY_BASE64" | base64 -d > ~/.minikube/profiles/minikube/client.key
-          kubectl config set-cluster minikube --server=https://127.0.0.1:8443 --certificate-authority=~/.minikube/ca.crt
-          kubectl config set-credentials minikube --client-certificate=~/.minikube/profiles/minikube/client.crt --client-key=~/.minikube/profiles/minikube/client.key
+          kubectl config set-cluster minikube --server=https://127.0.0.1:8443 --certificate-authority=$HOME/.minikube/ca.crt
+          kubectl config set-credentials minikube --client-certificate=$HOME/.minikube/profiles/minikube/client.crt --client-key=$HOME/.minikube/profiles/minikube/client.key
           kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=default
           kubectl config use-context minikube
+
 
       - name: Update ConfigMap in Kubernetes
         run: |
