@@ -2,8 +2,8 @@ name: Update ConfigMap
 
 on:
   push:
-    paths:
-      - app/index.html  # Monitorea cambios en el archivo index.html
+    branches:
+      - main  # Monitorea cambios en el archivo index.html
 
 jobs:
   update-configmap:
