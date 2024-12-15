@@ -17,18 +17,20 @@ spec:
       containers:
       - name: nginx
         image: nginx:latest
+        ports:
+        - containerPort: 80
         volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html
-        ports:
-        - containerPort: 80
       - name: sync
         image: alpine/git:latest
-        command: ["/bin/sh", "-c"]
+        command:
+        - /bin/sh
+        - -c
         args:
         - |
           while true; do
-            git clone https://github.com/tu-usuario/tu-repositorio /tmp/html || (cd /tmp/html && git pull);
+            git clone https://github.com/Arlequin404/gitops-practice /tmp/html || (cd /tmp/html && git pull);
             cp -r /tmp/html/index.html /usr/share/nginx/html/index.html;
             sleep 30;
           done
