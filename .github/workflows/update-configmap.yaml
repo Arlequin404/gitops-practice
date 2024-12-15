@@ -1,66 +1,34 @@
 name: Update ConfigMap
-
 on:
   push:
-    paths:
-      - app/index.html  # Detecta cambios en el archivo index.html
+    branches:
+      - main
 
 jobs:
   update-configmap:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Configurar kubectl
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: 'v1.31.0'
 
-      # 3. Autenticar con Kubernetes
       - name: Authenticate with Kubernetes
-        env:
-          CA_CRT_BASE64: ${{ secrets.CA_CRT_BASE64 }}
-          CLIENT_CRT_BASE64: ${{ secrets.CLIENT_CRT_BASE64 }}
-          CLIENT_KEY_BASE64: ${{ secrets.CLIENT_KEY_BASE64 }}
         run: |
           mkdir -p ~/.minikube/profiles/minikube ~/.kube
           echo "$CA_CRT_BASE64" | base64 -d > ~/.minikube/ca.crt
           echo "$CLIENT_CRT_BASE64" | base64 -d > ~/.minikube/profiles/minikube/client.crt
           echo "$CLIENT_KEY_BASE64" | base64 -d > ~/.minikube/profiles/minikube/client.key
+          kubectl config set-cluster minikube --server=https://127.0.0.1:8443 --certificate-authority=~/.minikube/ca.crt
+          kubectl config set-credentials minikube --client-certificate=~/.minikube/profiles/minikube/client.crt --client-key=~/.minikube/profiles/minikube/client.key
+          kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=default
+          kubectl config use-context minikube
 
-          cat <<EOF > ~/.kube/config
-          apiVersion: v1
-          clusters:
-          - cluster:
-              certificate-authority: /home/runner/.minikube/ca.crt
-              server: https://127.0.0.1:50983  # Reemplaza con la URL de tu clúster
-            name: minikube
-          contexts:
-          - context:
-              cluster: minikube
-              user: minikube
-            name: minikube
-          current-context: minikube
-          kind: Config
-          preferences: {}
-          users:
-          - name: minikube
-            user:
-              client-certificate: /home/runner/.minikube/profiles/minikube/client.crt
-              client-key: /home/runner/.minikube/profiles/minikube/client.key
-          EOF
-
-      # 4. Actualizar el ConfigMap
       - name: Update ConfigMap in Kubernetes
         run: |
           kubectl create configmap app-html \
-            --from-file=app/index.html -n default --dry-run=client -o yaml | kubectl apply -f -
-
-      # 5. Reiniciar los Pods para aplicar el nuevo ConfigMap
-      - name: Restart Pods
-        run: |
-          kubectl delete pod -l app=gitops-app -n default
+          --from-file=app/index.html \
+          --dry-run=client -o yaml | kubectl apply -f -
