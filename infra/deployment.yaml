@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: gitops-app
+      annotations:
+        checksum/config: "{{ .Values.configChecksum | default `null` }}"
     spec:
       containers:
       - name: nginx
@@ -26,3 +28,4 @@ spec:
       - name: html-volume
         configMap:
           name: app-html
+
