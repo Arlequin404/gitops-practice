@@ -17,28 +17,12 @@ spec:
       containers:
       - name: nginx
         image: nginx:latest
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
         ports:
         - containerPort: 80
-        volumeMounts:
-        - name: html-volume
-          mountPath: /usr/share/nginx/html
-      - name: sync
-        image: alpine/git:latest
-        command:
-        - /bin/sh
-        - -c
-        args:
-        - /bin/sh
-        - -c  
-        - |
-          while true; do
-            git clone https://github.com/Arlequin404/gitops-practice /tmp/html || (cd /tmp/html && git pull);
-            cp -r /tmp/html/app/index.html /usr/share/nginx/html/index.html;
-            sleep 30;
-          done
-        volumeMounts:
-        - name: html-volume
-          mountPath: /usr/share/nginx/html
       volumes:
       - name: html-volume
-        emptyDir: {}
+        configMap:
+          name: app-html
