@@ -1,0 +1,36 @@
+name: Update ConfigMap
+
+on:
+  push:
+    paths:
+      - app/index.html  # Monitorea cambios en el archivo index.html
+
+jobs:
+  update-configmap:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Descargar el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Configurar kubectl
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      # 3. Autenticarse con Kubernetes
+      - name: Authenticate with Kubernetes
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}  # Usa el secreto configurado
+        run: echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+      # 4. Actualizar el ConfigMap en Kubernetes
+      - name: Update ConfigMap in Kubernetes
+        run: |
+          kubectl create configmap app-html --from-file=app/index.html -n default --dry-run=client -o yaml | kubectl apply -f -
+
+      # 5. Reiniciar los Pods
+      - name: Restart Pods
+        run: |
+          kubectl delete pod -l app=gitops-app -n default
