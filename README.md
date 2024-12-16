@@ -14,23 +14,23 @@ Antes de comenzar, asegúrese de tener instaladas las siguientes herramientas:
 
 Git
 
-Instalación: `https://git-scm.com/downloads`
+Instalación: https://git-scm.com/downloads
 
 Minikube (para correr Kubernetes localmente)
 
-Instalación:` https://minikube.sigs.k8s.io/docs/start/`
+Instalación: https://minikube.sigs.k8s.io/docs/start/
 
 Kubectl (CLI para interactuar con Kubernetes)
 
-Instalación:` https://kubernetes.io/docs/tasks/tools/`
+Instalación: https://kubernetes.io/docs/tasks/tools/
 
 Argo CD (Herramienta para despliegues GitOps)
 
-Instalación: `https://argo-cd.readthedocs.io/`
+Instalación: https://argo-cd.readthedocs.io/
 
 Docker
 
-Instalación: `https://www.docker.com/get-started`
+Instalación: https://www.docker.com/get-started
 
 **Configuraciones Requeridas**
 
