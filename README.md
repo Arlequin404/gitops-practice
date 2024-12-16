@@ -1,4 +1,4 @@
-##Git Hooks - Automatización de Validaciones
+## Git Hooks - Automatización de Validaciones
 
 **Descripción del Proyecto**
 
@@ -16,7 +16,7 @@ npm: Gestor de dependencias para Node.js.
 
 ESLint: Herramienta para análisis estático de código JavaScript.
 
-###Instalación y Ejecución
+### Instalación y Ejecución
 
 **Clonar el repositorio**
 ```bash
@@ -67,7 +67,7 @@ Contacto
 
 **Cualquier duda o sugerencia, por favor contacta a tu-email@example.com.**
 
-##Git Hooks - Automation for Validations
+## Git Hooks - Automation for Validations
 
 **Project Description**
 
