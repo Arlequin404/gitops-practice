@@ -1,137 +1,134 @@
-## Git Hooks - Automatización de Validaciones
+## git-hooks-practice
 
 **Descripción del Proyecto**
 
-Este proyecto ilustra cómo implementar Git Hooks para automatizar verificaciones de calidad de código antes de realizar un commit. La configuración incluye un pre-commit hook que ejecuta ESLint, garantizando que el código cumple con los estándares definidos.
+Este proyecto tiene como objetivo implementar un flujo de despliegue continuo (CD) utilizando prácticas de GitOps. Se utiliza Kubernetes como plataforma de orquestación de contenedores y Argo CD como herramienta de GitOps para automatizar y sincronizar el estado del clúster con el repositorio Git.
+
+Con GitOps, la infraestructura y las aplicaciones son declaradas en un repositorio Git, lo cual permite trazabilidad, control de versiones y despliegues automáticos.
 
 **Requisitos**
 
-**Herramientas necesarias:**
+Antes de comenzar, asegúrese de tener instaladas las siguientes herramientas:
 
-Git: Sistema de control de versiones.
+**Herramientas Necesarias**
 
-Node.js: Entorno de ejecución para JavaScript.
+Git
 
-npm: Gestor de dependencias para Node.js.
+Instalación: `https://git-scm.com/downloads`
 
-ESLint: Herramienta para análisis estático de código JavaScript.
+Minikube (para correr Kubernetes localmente)
 
-### Instalación y Ejecución
+Instalación:` https://minikube.sigs.k8s.io/docs/start/`
 
-**Clonar el repositorio**
+Kubectl (CLI para interactuar con Kubernetes)
+
+Instalación:` https://kubernetes.io/docs/tasks/tools/`
+
+Argo CD (Herramienta para despliegues GitOps)
+
+Instalación: `https://argo-cd.readthedocs.io/`
+
+Docker
+
+Instalación: `https://www.docker.com/get-started`
+
+**Configuraciones Requeridas**
+
+Repositorio Git: Debe clonar el repositorio que contiene los manifiestos de configuración de Kubernetes y los recursos necesarios para la aplicación.
+
+Clonar el Proyecto
+
+Para descargar el código fuente del repositorio, ejecute el siguiente comando en su terminal:
+
+### Clonar el repositorio
 ```bash
-git clone https://github.com/Arlequin404/git-hooks-practice.git
-cd tu-repositorio-githooks
+git clone https://github.com/tu-usuario/tu-repositorio-gitops.git
 ```
-**Instalación de dependencias**
-
-Inicializar el proyecto Node.js:
+### Acceder a la carpeta del proyecto
 ```bash
-npm init -y
+cd tu-repositorio-gitops
 ```
-Instalar ESLint:
+Instalación de Requisitos y Configuración
+
+**1. Configurar Minikube y Kubernetes**
+
+Inicie Minikube para crear un clúster Kubernetes local:
+
+# Iniciar Minikube
 ```bash
-npm install eslint --save-dev
+minikube start
 ```
-Configurar ESLint:
+# Verificar el estado del clúster
 ```bash
-npx eslint --init
+minikube status
 ```
-Configurar Git Hook
+**2. Configurar Argo CD**
 
-**Crear un archivo en .git/hooks/pre-commit con el siguiente contenido:**
+Instale Argo CD en el clúster local:
+
+# Crear el namespace de Argo CD
 ```bash
-#!/bin/sh
-echo "Ejecutando ESLint..."
-npx eslint src/**/*.js
-if [ $? -ne 0 ]; then
-  echo "Errores encontrados. Commit cancelado."
-  exit 1
-fi
+kubectl create namespace argocd
 ```
-**Dar permisos de ejecución al archivo:**
+# Instalar Argo CD en el namespace
 ```bash
-chmod +x .git/hooks/pre-commit
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
-Probar el Hook
-
-**Realizar cambios en los archivos JavaScript.**
-
-###Intentar realizar un commit y verificar que ESLint bloquea el commit si encuentra errores.
-
-Corregir errores con:
+# Verificar los pods de Argo CD
 ```bash
-npx eslint src/**/*.js --fix
+kubectl get pods -n argocd
 ```
-Contacto
-
-**Cualquier duda o sugerencia, por favor contacta a tu-email@example.com.**
-
-## Git Hooks - Automation for Validations
-
-**Project Description**
-
-This project demonstrates how to implement Git Hooks to automate code quality checks before committing. The setup includes a pre-commit hook that runs ESLint to ensure code adheres to defined standards.
-
-**Requirements**
-
-**Necessary Tools:**
-
-Git: Version control system.
-
-Node.js: JavaScript runtime environment.
-
-npm: Dependency manager for Node.js.
-
-ESLint: Tool for static code analysis in JavaScript.
-
-**Installation and Execution**
-
-Clone the repository
+Exponer el servicio de Argo CD en su máquina local:
 ```bash
-git clone https://github.com/your-username/your-githooks-repository.git
-cd your-githooks-repository
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
 ```
-**Install dependencies**
-
-Initialize the Node.js project:
+# Acceder a Argo CD en el navegador
 ```bash
-npm init -y
+minikube service argocd-server -n argocd
 ```
-Install ESLint:
-```bash
-npm install eslint --save-dev
-```
-Configure ESLint:
-```bash
-npx eslint --init
-```
-Set up Git Hook
+Por defecto, las credenciales de acceso a Argo CD son:
 
-**Create a file in .git/hooks/pre-commit with the following content:**
+**Usuario: admin**
+
+Contraseña: obtenida con el siguiente comando:
 ```bash
-#!/bin/sh
-echo "Running ESLint..."
-npx eslint src/**/*.js
-if [ $? -ne 0 ]; then
-  echo "Errors found. Commit aborted."
-  exit 1
-fi
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 ```
-Make the file executable:
+**3. Sincronizar la Aplicación con Argo CD**
+
+Cree una aplicación en Argo CD que sincronice el clúster Kubernetes con el repositorio Git:
 ```bash
-chmod +x .git/hooks/pre-commit
+kubectl apply -f infra/app-config.yaml
 ```
-Test the Hook
+Este archivo YAML debe contener los manifiestos necesarios para el despliegue de la aplicación.
 
-Make changes to JavaScript files.
+Ejecutar el Proyecto
 
-**Attempt to commit and verify that ESLint blocks the commit if errors are found.**
+Paso 1: Validar la Aplicación en Kubernetes
 
-Fix errors with:
+Ejecute el siguiente comando para verificar que los pods están activos:
 ```bash
-npx eslint src/**/*.js --fix
+kubectl get pods -n default
 ```
-**Contact**
+Paso 2: Exponer la Aplicación
 
-For any questions or suggestions, please contact your-email@example.com.
+Si la aplicación está configurada como un servicio, puede exponerla de la siguiente manera:
+```bash
+kubectl expose deployment gitops-app --type=NodePort --name=gitops-app-service
+```
+### Acceder a la aplicación
+```bash
+minikube service gitops-app-service
+```
+**Paso 3: Validar la Sincronización de Argo CD**
+
+Desde el panel de Argo CD, asegúrese de que el estado de la aplicación sea Synced.
+
+Contribuciones
+
+Las contribuciones son bienvenidas. Si encuentras problemas o deseas mejorar el proyecto, por favor abre un issue o envía un pull request.
+
+Licencia
+
+**Este proyecto está licenciado bajo la MIT License.**
+
